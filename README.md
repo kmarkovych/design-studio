@@ -1,5 +1,18 @@
 # design-studio
 
+## Two plugins in this repository
+
+This repository is a Claude Code plugin marketplace with two independent plugins. Neither requires the other: install one, or both.
+
+| Plugin | What it does | Install |
+|---|---|---|
+| design-studio | The work of a UI/UX designer for browser-rendered interfaces. The rest of this README is about it. | `/plugin install design-studio@design-studio` |
+| knowledge-vault | Keeps one Obsidian vault per product, in its own private git repository, up to date with the product's code. See [plugins/knowledge-vault/README.md](plugins/knowledge-vault/README.md). | `/plugin install knowledge-vault@design-studio` |
+
+Add the marketplace once first: `/plugin marketplace add kmarkovych/design-studio`.
+
+## About design-studio
+
 design-studio is a Claude Code plugin that does the work of a UI/UX designer for interfaces that run in a browser. You call it from inside the project you want designed. It interviews you, builds three different visual directions for one key screen, and has separate agents that built none of them compare the directions from screenshots. It then refines the direction you pick until a scripted check and the critics find nothing blocking, and documents the result as a design system.
 
 It is built on the [impeccable](https://github.com/pbakaus/impeccable) design skill. Impeccable supplies the design knowledge, the screenshot tool, the detector and the finish agents. The studio adds five things: an intake grill, three divergent directions, judging, capped refinement and scripted checks.
@@ -57,7 +70,7 @@ claude plugin install design-studio@design-studio
 
 `claude plugin install` installs for your user by default. Add `--scope project` to install it for one project only.
 
-The repository is private for now. Claude Code fetches it with the git credentials already on your machine, so you need read access to it. The install commands above have not yet been run against the published repository.
+The repository is public, so no credentials are needed. The install commands above have not yet been run against the published repository.
 
 Once it is installed, the skill is `/design-studio:studio-run`. Start a run with that command, or by saying "run the design studio". A plain request such as "design the pricing page" may load impeccable directly instead, because impeccable answers the same kind of request; whether Claude Code picks the studio on its own has not been tested.
 
@@ -66,10 +79,10 @@ Once it is installed, the skill is `/design-studio:studio-run`. Start a run with
 The skill is a plain Agent Skill, written so that it can also run in OpenAI Codex CLI, OpenClaw and similar agents. None of them has been tested.
 
 ```
-npx skills add kmarkovych/design-studio
+npx skills add kmarkovych/design-studio --skill studio-run
 ```
 
-There the skill is called `studio-run`. `npx skills` installs into the current project by default. Its documentation does not say how it handles private repositories, so that is unknown until the repository is public or someone tries it.
+There the skill is called `studio-run`. The marketplace also holds the knowledge-vault plugin's two skills; `--skill studio-run` keeps them out. `npx skills` installs into the current project by default.
 
 Outside Claude Code, the studio's four agent definitions are not installed. The skill tells the host agent to start fresh sub-agents with the same instructions instead, on a mid-tier model for building and the strongest available model for judging. If the agent cannot start sub-agents, the skill does each piece of work one after another with a clean slate and says that it did. It also says that the agents that make comps and the agents that judge them were then less well separated.
 
@@ -370,7 +383,7 @@ Uninstalling leaves your projects alone: `PRODUCT.md`, `DESIGN.md` and every `de
 
 ## Status and known limits
 
-- Version 0.1.0. The repository is private.
+- Version 0.1.0. The repository is public under the MIT licence.
 - Claude Code is the primary host. The scripts and the manifest are tested there; a complete run of the skill has not yet been carried out in any agent. Codex CLI, OpenClaw and similar agents are designed for, not yet tested.
 - The scripts (preflight, check, gallery) have automated tests, and the plugin manifest passes `claude plugin validate`. The install, update and uninstall commands above have not yet been run against the published repository.
 - Accessibility is judged by a model, not measured.
@@ -378,7 +391,7 @@ Uninstalling leaves your projects alone: `PRODUCT.md`, `DESIGN.md` and every `de
 - The cost of a run has not been measured.
 - The studio covers the design stage only. It does not write production code.
 
-No licence has been chosen yet.
+Licensed under the MIT licence (see `LICENSE`). The dependencies keep their own licences and are not copied into this repository.
 
 ## Developing the studio
 
@@ -405,7 +418,7 @@ Check the plugin manifests:
 claude plugin validate .
 ```
 
-It ends with `✔ Validation passed`. Before that, it prints the rules the public plugin directory would apply to a submission. These currently name a missing licence and a missing icon. They do not change the result, and they matter only for a directory submission.
+It ends with `✔ Validation passed`. Before that, it prints the rules the public plugin directory would apply to a submission. These currently name a missing icon. They do not change the result, and they matter only for a directory submission.
 
 Load your working copy without installing it:
 

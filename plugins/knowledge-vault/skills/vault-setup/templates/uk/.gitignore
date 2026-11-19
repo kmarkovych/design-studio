@@ -1,0 +1,16 @@
+# Секрети — ніколи не комітити (переносяться між машинами окремо)
+Ключі/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# macOS
+.DS_Store
+._*
+
+# Obsidian: стан конкретної машини
+.obsidian/workspace*.json
+.obsidian/cache
+.trash/

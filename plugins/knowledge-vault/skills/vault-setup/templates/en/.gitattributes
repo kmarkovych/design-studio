@@ -1,0 +1,5 @@
+# Notes are always LF
+*.md text eol=lf
+
+# The change log is append-only: when two machines write at once, keep the lines of both sides
+10-Product/Change-log/*.md merge=union

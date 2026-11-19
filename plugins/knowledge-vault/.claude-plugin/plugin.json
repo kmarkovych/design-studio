@@ -1,0 +1,8 @@
+{
+  "name": "knowledge-vault",
+  "description": "Keeps one Obsidian vault per product, in its own private git repository, up to date with the product's code: mechanical vault sync between machines, and documentation passes in attended sessions whenever functionality changes reach the main branch.",
+  "version": "0.1.0",
+  "author": { "name": "Kostiantyn Markovych" },
+  "license": "MIT",
+  "keywords": ["obsidian", "vault", "documentation", "knowledge-base", "git"]
+}

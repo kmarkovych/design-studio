@@ -1,12 +1,17 @@
 {
   "name": "design-studio",
   "owner": { "name": "Kostiantyn Markovych" },
-  "description": "The design-studio plugin: a multi-agent UI/UX design studio built on the impeccable skill.",
+  "description": "Two independent plugins: design-studio, a multi-agent UI/UX design studio built on the impeccable skill, and knowledge-vault, which keeps one Obsidian vault per product up to date with its code.",
   "plugins": [
     {
       "name": "design-studio",
       "source": "./",
       "description": "Interviewed brief, three divergent directions judged from rendered pixels, capped refinement with scripted checks."
+    },
+    {
+      "name": "knowledge-vault",
+      "source": "./plugins/knowledge-vault",
+      "description": "One Obsidian vault per product in its own private git repository: documentation passes after functionality changes reach the main branch, and mechanical vault sync between machines."
     }
   ]
 }

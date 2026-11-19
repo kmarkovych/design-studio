@@ -1,0 +1,16 @@
+# Secrets: never commit (move them between machines separately)
+Keys/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# macOS
+.DS_Store
+._*
+
+# Obsidian: state of one machine
+.obsidian/workspace*.json
+.obsidian/cache
+.trash/
