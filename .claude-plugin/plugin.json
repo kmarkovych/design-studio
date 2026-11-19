@@ -1,0 +1,7 @@
+{
+  "name": "design-studio",
+  "description": "A multi-agent design studio: an interviewed brief, three divergent directions built and judged from rendered pixels, capped refinement with scripted checks, and a documented design system. Built on the impeccable skill.",
+  "version": "0.1.0",
+  "author": { "name": "Kostiantyn Markovych" },
+  "keywords": ["design", "ui", "ux", "frontend", "impeccable", "multi-agent"]
+}

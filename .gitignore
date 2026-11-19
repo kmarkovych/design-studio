@@ -1,0 +1,4 @@
+node_modules/
+.DS_Store
+# impeccable's own screenshot scratch folder; run files under design/runs/ are kept
+.impeccable/shots/

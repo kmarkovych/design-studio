@@ -1,0 +1,12 @@
+{
+  "name": "design-studio",
+  "owner": { "name": "Kostiantyn Markovych" },
+  "description": "The design-studio plugin: a multi-agent UI/UX design studio built on the impeccable skill.",
+  "plugins": [
+    {
+      "name": "design-studio",
+      "source": "./",
+      "description": "Interviewed brief, three divergent directions judged from rendered pixels, capped refinement with scripted checks."
+    }
+  ]
+}
