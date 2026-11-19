@@ -15,7 +15,7 @@ A run is one pass of the studio on one brief. It produces:
 - `DESIGN.md` at your project root, written by impeccable's documenter from the final comps.
 - A sign-off record that states plainly whether the comps passed or the run stopped with findings still open.
 
-Comps are standalone HTML and CSS files. Every colour, font, size, spacing step, radius and duration is a CSS custom property, and the pages open from disk with no build step. They use your real copy. Testimonials, customer names, logos and figures appear only when you have said they are real; anything missing is a visibly marked placeholder.
+Comps are standalone HTML and CSS files. Every colour, font, size, spacing step, radius and duration is a CSS custom property, and the pages open from disk with no build step. They use your real copy. Proof (claims about customers or outcomes: testimonials, customer names and logos, customer counts, ratings, press, photographs of real people or places, performance figures) appears only when you have said it is real; anything missing is a visibly marked placeholder. Arithmetic on a real figure you gave (a price times a number of units) and sample data visibly labelled as such inside a drawn product view are not proof.
 
 A run delivers the design stage only. Putting the design into your project's real code is a separate, later implementation stage, and the studio does not do it.
 
@@ -144,7 +144,7 @@ The run starts with preflight. If anything fails, you get each failure with its 
 
 ### 2. The intake grill, ending at Gate 1
 
-The grill is an interview that follows the grilling skill. It works in rounds and asks every question it can answer at that point in one round. Anything it can look up in your project, it looks up instead of asking: your README, routes, existing copy, brand files, fonts, stylesheets, and any proof such as testimonials or figures. You make the decisions.
+The grill is an interview that follows the grilling skill. It works in rounds and asks every question it can answer at that point in one round. Anything it can look up in your project, it looks up instead of asking: your README, routes, existing copy, brand files, fonts, stylesheets, and any proof such as testimonials, ratings or performance figures. You make the decisions.
 
 For a redesign, it first takes screenshots of the existing page at both widths, runs impeccable's detector on it, and has a critic assess it. The first round then opens with what is wrong today and asks what must survive.
 
@@ -202,8 +202,9 @@ If blocking findings remain after three rounds, Gate 3 instead says the run is n
     ├── directions/<a|b|c>/
     │   ├── direction.md           the direction's contract
     │   ├── index.html, styles.css the key-screen comp and its local files
-    │   ├── shots/index/           1440x900.png, 390x844.png, and -full.png whole-page versions
-    │   └── checks/index.json      check result
+    │   ├── shots/index/           1440x900.png, 390x844.png, -full.png whole-page versions,
+    │   │                          and readable slices of those (-full-1.png, -full-2.png ...)
+    │   └── checks/index.json      check result, listing the slices
     ├── judging.json               the judges' pairwise results
     ├── gallery.html               the directions side by side, with the ranking
     ├── decision.md                your Gate 2 choice in your words, borrow notes, FORM line
@@ -227,36 +228,39 @@ Critique and audit results are written into the run folder only. The studio does
 
 A comp passes only when both of these hold:
 
-1. **The check exits 0 on every page.** The check is `check.mjs`. It takes screenshots with `impeccable shot` at 1440x900 and 390x844, of the first viewport and of the whole page, then runs `impeccable detect` three times: on the HTML file, and on the rendered page at each width. Any primary finding fails the page; advisories are recorded but do not count. It writes the screenshots to `shots/<page>/` and the result to `checks/<page>.json`. Exit 0 means pass, 2 means findings, and 1 means the check could not run.
+1. **The check exits 0 on every page.** The check is `check.mjs`. It takes screenshots with `impeccable shot` at 1440x900 and 390x844, of the first viewport and of the whole page, then runs `impeccable detect` three times: on the HTML file, and on the rendered page at each width. Any primary finding fails the page; advisories are recorded but do not count. Each finding names the file the detector pointed to (for the check's own scans, the page itself, always as a path), the line in it (`0` when the detector does not know it, which in impeccable 4.10 is always), and how many times the same rule and snippet came up in one scan. It writes the screenshots to `shots/<page>/` and the result to `checks/<page>.json`. It also cuts each whole-page capture into slices a person or model can read (`1440x900-full-1.png`, `1440x900-full-2.png` ... and the same for `390x844`), numbered from the top: at most 1400 px tall on desktop and 1600 px on phone, overlapping by 100 px, listed in order under `slices` in the result. Exit 0 means pass, 2 means findings, and 1 means the check could not run.
 2. **No critic finding of severity P0 or P1 remains.** The severities are impeccable's. P0 means the finding stops the visitor from completing what they came to do. P1 means significant difficulty or a WCAG AA violation. P2 and P3 are recorded but do not block.
 
 A critic's opinion can rank and advise, but it cannot pass a comp that fails the check.
 
-Real check output, from three trial comps (project path shortened to `<project>`):
+Real check output, from copies of two trial comps (folder shortened to `<comps>`):
 
 ```
-PASS <project>/design/runs/2026-11-19-pricing-page/directions/a/index.html
-0 primary finding(s), 0 advisory, 0 error(s)
+PASS <comps>/a/index.html
+0 primary finding(s), 1 advisory, 0 error(s)
 
-FAIL <project>/design/runs/2026-11-19-pricing-page/directions/c/index.html
-2 primary finding(s), 0 advisory, 0 error(s)
-  [warning] low-contrast: 1.5:1 (need 4.5:1) — text #d4d4d4 on #ffffff (static)
-  [warning] low-contrast p.note: 1.5:1 (need 4.5:1) — text #d4d4d4 on #ffffff (rendered-1440x900, rendered-390x844)
+FAIL <comps>/b/index.html
+1 primary finding(s), 3 advisory, 0 error(s)
+  [warning] tight-leading: line-height 1.24x (need >=1.3) at <comps>/b/index.html x5 (static)
 ```
 
-Making and judging are kept apart. Direction designers and the fixer never judge. Judges and critics never see the conversation in which a comp was made, only files and screenshots, and they must open the PNG screenshots rather than reason from the source. Direction designers and the fixer run on a mid-tier model (`sonnet`), and judges and critics on a stronger one (`opus`). The studio never relies on the conversation's default model, and it tells you if a model could not be set.
+That finding has no selector, and `1.24` appears nowhere in the comp's CSS: the static scan works out sizes without a browser, and it misjudged the comp's `clamp()` lede size, so the lede's `line-height: 1.4` came out as 1.24 (with a fixed lede size, or a line-height of 1.5, it is not reported). The rendered scans did not report it. The designer has to find such rules by reading the CSS (see "Limits you should know").
 
-Judges score each comp from 1 to 5 on design quality, originality, craft, and fit to the brief, weighted to a total out of 50, and name a winner for their pair. The gallery's ranking is the count of pairwise wins. When the judges' preferences go round in a circle, the gallery says there is no clear winner, and the studio does not break the tie.
+Making and judging are kept apart. Direction designers and the fixer never judge. Judges and critics never see the conversation in which a comp was made, only files and screenshots, and they must open the PNG screenshots (the first viewport at each width and every slice of the whole page) rather than reason from the source. Direction designers and the fixer run on a mid-tier model (`sonnet`), and judges and critics on a stronger one (`opus`). The studio never relies on the conversation's default model, and it tells you if a model could not be set.
+
+Judges score each comp from 1 to 5 on design quality, originality, craft, and fit to the brief, weighted to a total out of 50, and name a winner for their pair. Fit includes what your brief says will decide your pick. A comp that shows proof you did not name as real scores 1 on fit; a visibly marked placeholder is not held against it unless the comp's lead depends on content you said does not exist. The gallery's ranking is the count of pairwise wins. When the judges' preferences go round in a circle, the gallery says there is no clear winner, and the studio does not break the tie.
 
 ### Limits you should know
 
 - **Accessibility is judged by a model, not measured by a script.** The audit critic follows impeccable's audit playbook from screenshots and source. The detector does catch some problems, such as low contrast, but no script audits accessibility as a whole in this version.
+- **The check cannot always say where a finding is.** The detector gives no line numbers, and a static-scan finding often has no selector. Its snippet can be a value the detector computed, such as `line-height 1.24x`, which appears nowhere in the source and can differ from what a browser computes, because the static scan can misjudge a `clamp()` or `calc()` size. The designer or fixer then has to find the rule by reading the CSS.
 - **Round caps and stage order are followed by the agent, not enforced by code.** The only verdict that code enforces is the check's exit code. See `docs/adr/0001-skills-are-the-only-orchestration.md` for why.
-- Judges see the first viewport at each width, because the check captures only that. Critics also read the source for what no screenshot shows, such as focus states.
+- Judges and critics see the first viewport at each width and the whole page in slices. Critics also read the source for what no screenshot shows, such as focus states.
+- A fixed or sticky element, such as a header or a bottom action bar, is painted partway down the whole-page captures and their slices, over other content. That is a capture artifact: judges and critics judge fixed and sticky elements from the first-viewport captures only.
 - Screenshots are taken as the page loads, with no wait for motion and no reduced-motion setting, so comps must show their content at load; content caught mid-animation counts against a comp.
 - Changes made after refinement (the finish reviewer's correction round, or changes you ask for at Gate 3) are covered by the check and the finish reviewer, not by another critic round. Gate 3 says so.
 - Impeccable's finish reviewer expects the direction contract to name a seed from impeccable's own direction roll (`concept-seed`). The studio does not use that roll. Instead it writes `seed: none (pinned)` and quotes the stance the studio proposed and you confirmed at Gate 1, plus your own words from Gate 2. The reviewer may still list this as a material fix, and usually will, because it accepts a pin only when your own request or answers pin both the direction's world and its first screen. Gate 3 then names it as the studio's known substitute. When it is the reviewer's only material fix, the studio skips the correction round, since there is nothing for the fixer to change.
-- For a redesign, the existing page is captured with `impeccable shot` and `impeccable detect` directly, not through `check.mjs`, which takes only a local comp file. It is the one exception to capturing through the check.
+- For a redesign, the existing page is captured with `impeccable shot` and `impeccable detect` directly, not through `check.mjs`, which takes only a local comp file, so its whole-page captures are not cut into slices. It is the one exception to capturing through the check.
 - The critic is told never to change files, but it keeps Bash to inspect evidence, so that rule is followed by the agent, not enforced by its tool list. The judge has no tool that can write.
 
 ## Cost
@@ -265,7 +269,7 @@ The cost of a full run has not been measured. A run uses many sub-agents: up to 
 
 - three directions, one key screen each, at two widths;
 - one judge per pair;
-- at most three check runs per direction designer;
+- at most three check runs per direction designer, every run counted;
 - at most three refinement rounds, then one verification by the critics;
 - one correction round after the finish reviewer.
 

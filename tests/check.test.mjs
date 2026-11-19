@@ -5,6 +5,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { SCRIPTS, tmp, makeSkill, writeJson } from './helpers.mjs';
+import { decodePng } from '../skills/studio-run/scripts/png.mjs';
 
 const finding = (over = {}) => ({
   antipattern: 'low-contrast', name: 'Low contrast', description: 'too pale',
@@ -42,6 +43,45 @@ test('clean page passes, exit 0, screenshots and result written', () => {
   const shots = join(root, 'comps', 'shots', 'index');
   assert.deepEqual([...written.screenshots].sort(), ['1440x900.png', '390x844.png', '1440x900-full.png', '390x844-full.png'].map((f) => join(shots, f)).sort());
   assert.deepEqual(JSON.parse(r.stdout), written);
+});
+
+test('whole-page captures are cut into numbered, overlapping slices', () => {
+  const { r, written, root } = setup([]);
+  assert.equal(r.status, 0, r.stderr);
+  const shots = join(root, 'comps', 'shots', 'index');
+  const names = ['1440x900-full-1', '1440x900-full-2', '1440x900-full-3', '390x844-full-1', '390x844-full-2', '390x844-full-3'];
+  assert.deepEqual(written.slices, names.map((n) => join(shots, `${n}.png`)));
+  const dims = written.slices.map((f) => { const i = decodePng(readFileSync(f)); return [i.width, i.height, i.pixels[0]]; });
+  // desktop 3000 rows: tops 0, 1300, 2600; phone 4000 rows: tops 0, 1500, 3000
+  assert.deepEqual(dims, [[1440, 1400, 0], [1440, 1400, 1300 & 255], [1440, 400, 2600 & 255], [390, 1600, 0], [390, 1600, 1500 & 255], [390, 1000, 3000 & 255]]);
+});
+
+test('a capture that cannot be sliced is an operational failure', () => {
+  const { r, written } = setup([], { env: { FAKE_PNG_BAD: '1' } });
+  assert.equal(r.status, 1);
+  assert.equal(written.pass, false);
+  assert.match(written.errors.join(' '), /slice/i);
+});
+
+test('findings keep the detector file and count repeats within one scan', () => {
+  const f = finding({ selector: undefined, line: 0, file: '/x/index.html' });
+  const { written } = setup([f, f, f, finding({ snippet: 'other', file: '/x/index.html' })], { code: 2 });
+  const rep = written.findings.find((x) => x.snippet === '<p>x</p>');
+  assert.equal(rep.occurrences, 3);
+  assert.equal(rep.file, '/x/index.html');
+  assert.deepEqual(rep.scans, ['static', 'rendered-1440x900', 'rendered-390x844']);
+  assert.equal(written.findings.find((x) => x.snippet === 'other').occurrences, 1);
+  assert.equal(setup([finding({ file: undefined })], { code: 2 }).written.findings[0].file, null);
+});
+
+test('occurrences count the same rule and snippet in one scan, whatever the selector', () => {
+  const { written } = setup([finding({ selector: 'p.a' }), finding({ selector: 'p.b' })], { code: 2 });
+  assert.deepEqual(written.findings.map((x) => [x.selector, x.occurrences]), [['p.a', 2], ['p.b', 2]]);
+});
+
+test('a file:// URL from a rendered scan is recorded as a path', () => {
+  const { written } = setup([finding({ file: 'file:///x/my%20page.html' })], { code: 2 });
+  assert.equal(written.findings[0].file, '/x/my page.html');
 });
 
 test('runs one static and two rendered scans with viewports', () => {
@@ -126,6 +166,14 @@ test('human output shows PASS or FAIL and one line per primary finding', () => {
   assert.equal(r.status, 2);
   assert.match(r.stdout, /^FAIL/m);
   assert.match(r.stdout, /low-contrast/);
+  assert.match(r.stdout, / at p\.html:3 \(/);
+});
+
+test('human output leaves out a line number of 0', () => {
+  const { root, page } = setup([finding({ line: 0 })], { code: 2 });
+  const env = { ...process.env, IMPECCABLE_SKILL_DIR: join(root, 'skill'), FAKE_DETECT_OUT: join(root, 'detect.json'), FAKE_DETECT_CODE: '2' };
+  const r = spawnSync(process.execPath, [SCRIPTS + 'check.mjs', page], { cwd: root, env, encoding: 'utf8' });
+  assert.match(r.stdout, / at p\.html \(/);
 });
 
 const REAL = join(homedir(), '.claude', 'skills', 'impeccable');

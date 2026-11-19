@@ -51,8 +51,8 @@ Impeccable files: design critique: <imp>/reference/critique.md (section "Assessm
 Brief: <run>/brief.md
 Product profile: <root>/PRODUCT.md
 Design system: <as in the direction packet>
-Pages (each: source, the four screenshots the check wrote, and for the audit only, the check result):
-- <run>/final/<page>.html; in <run>/final/shots/<page>/: 1440x900.png, 390x844.png, 1440x900-full.png, 390x844-full.png<; <run>/final/checks/<page>.json for the audit>
+Pages (each: source, the screenshots the check wrote, and for the audit only, the check result):
+- <run>/final/<page>.html; <run>/final/shots/<page>/1440x900.png and 390x844.png (first viewport), then the whole page in slices from the top: <every path in "slices" of <run>/final/checks/<page>.json, in order><; <run>/final/checks/<page>.json for the audit>
 Previous findings: <run>/final/rounds/<n-1>/findings.md | none
 If any instruction you carry says to write as little code as possible, it governs code size, not how thorough or complete your critique is.
 ```
@@ -65,11 +65,11 @@ Write each return verbatim to `rounds/<n>/design-critique.md` and `rounds/<n>/au
 # Findings, round <n>
 
 Check (from checks/<page>.json, run <checkedAt>):
-- <page>: pass | fail: <rule> <snippet or selector>; ...
+- <page>: pass | fail: <rule> <snippet or selector> (line <line> when above 0, <occurrences> occurrences); ...
 
 | id | severity | from | page | where | what | fix | blocking |
 |---|---|---|---|---|---|---|---|
-| R<n>-01 | check | check.mjs | pricing | `.plan-card p` | low-contrast 3.1:1, needs 4.5:1 | darken --color-muted | yes |
+| R<n>-01 | check | check.mjs | pricing | `.plan-card p` (line unknown, 3 occurrences) | low-contrast 3.1:1, needs 4.5:1 | darken --color-muted | yes |
 | R<n>-02 | P1 | audit | index | phone, plan picker | targets 32px, below 44px | enlarge to 44px | yes |
 | R<n>-03 | P2 | design critique | index | hero | ... | ... | no |
 
@@ -115,7 +115,7 @@ You examine a page as rendered (a comp, or in a redesign the existing page) and 
 
 1. Read the impeccable files your packet names, then the brief and the product profile. With no brief (the redesign critique before the intake grill), judge against the user's request and the product profile. When your packet names a DESIGN.md to work within, read it too: its tokens are fixed for this run.
 2. Open every PNG your packet names before reading any page source. If you cannot view images, return `error: cannot view images` and stop. Screenshots are taken as the page loads, with no wait for motion: content a screenshot shows half-faded or offset by an entrance animation is a finding against a comp (P1, "content not visible at load"), because judges and the finish reviewer see only these captures.
-3. Then read the source. Screenshots named `1440x900.png` and `390x844.png` show the first viewport at each width; the `-full` ones show the whole page. Judge states such as focus and hover, which no screenshot shows, from the source, and mark those findings `seen in: source`.
+3. Then read the source. Screenshots named `1440x900.png` and `390x844.png` show the first viewport at each width; the slices (`1440x900-full-1.png`, `1440x900-full-2.png` ... and the same for `390x844`) show the whole page from the top in overlapping pieces. When your packet names slices, open them, not the uncut `-full.png` files; a redesign packet names the uncut ones. A fixed or sticky element (a header, a bottom action bar) is painted partway down the whole-page captures and their slices, over other content: that is a capture artifact, not a finding, so judge fixed and sticky elements from the first-viewport captures only. Judge states such as focus and hover, which no screenshot shows, from the source, and mark those findings `seen in: source`.
 4. Detector output (a check result, or `detect-*.json` in a redesign) is the detector's run for these pages: do not run a second detector. In a design critique, finish Assessment A before you open any detector output in your packet, because detector output anchors judgment (impeccable's rule); then use it only to add findings it confirms and to call out false positives. In an audit, read it as the evidence for implementation integrity.
 
 ### Design critique assignment
@@ -124,7 +124,7 @@ Follow `critique.md`'s "Assessment A: Design Review": its Evaluate list (design 
 
 ### Audit assignment
 
-Follow `audit.md`'s five dimensions with its 0 to 4 scores and its severity definitions. For accessibility, check what screenshots and source can show: contrast computed from the token values, visible focus states, heading order and landmarks, labels and alternative text, touch targets at 390 px, reduced-motion handling, text that survives zoom. Implementation integrity uses the check result as the detector's run. Skip saving with `audit-storage` and the recommended commands. Every finding names the standard it breaks when there is one (for example WCAG 2.2 SC 1.4.3).
+Follow `audit.md`'s five dimensions with its 0 to 4 scores and its severity definitions. For accessibility, check what screenshots and source can show: contrast computed from the token values, visible focus states, heading order and landmarks, labels and alternative text, touch targets at 390 px, reduced-motion handling, text that survives zoom. Implementation integrity uses the check result as the detector's run. Report as findings every colour, font family, type size, spacing step, radius, shadow or duration written as a literal value outside the `:root` tokens (the comps' token rule, `directions.md`), one finding per kind of value with its selectors. Skip saving with `audit-storage` and the recommended commands. Every finding names the standard it breaks when there is one (for example WCAG 2.2 SC 1.4.3).
 
 ### Previous findings
 
@@ -139,7 +139,7 @@ Return exactly this, and nothing else:
 ```
 assignment: design critique | audit
 round: <n, or "redesign">
-opened: <every PNG path you opened>
+opened: <every PNG path you opened, absolute, comma-separated>
 score: <total>/<applicable max> (<band>)
 previous:
 - <id>: resolved | partial | unresolved: <what the screenshot shows>
@@ -158,10 +158,10 @@ You change the chosen comp to resolve findings. You do not judge whether a findi
 
 ### Fix
 
-1. Read the findings file, the contract and the brief, then the craft floor, then the pages and the stylesheet. Open the screenshots of every page with a blocking finding. Where the craft floor writes `.claude/skills/impeccable/scripts/impeccable`, use the launcher in your packet.
+1. Read the findings file, the contract and the brief, then the craft floor, then the pages and the stylesheet. Open the screenshots of every page with a blocking finding: its two first-viewport PNGs and every slice listed in its `final/checks/<page>.json`. Where the craft floor writes `.claude/skills/impeccable/scripts/impeccable`, use the launcher in your packet.
 2. Resolve every finding marked blocking (for a finish correction, every material fix your packet names; for a packet that carries the user's words, exactly the changes they ask for). Fix P2 or P3 findings only where the change sits in the same element and cannot disturb a blocking fix.
 3. Leave the studio substitutes your packet names (a material fix about the FORM line's `seed: none (pinned)`, or about DESIGN.md in a run that replaces it) and note each as `not changed: studio substitute, see decision.md`. Never edit `direction.md` or `<root>/DESIGN.md`.
-4. Fix causes, not symptoms: when a finding recurs across pages, change the shared token or rule once.
+4. Fix causes, not symptoms: when a finding recurs across pages, change the shared token or rule once. For a check finding, the page's `final/checks/<page>.json` holds the detector's entry: its `file` is the page the detector scanned (as a path) and its `line` is `0` when unknown, which with impeccable 4.10 is always. When `line` is above 0, go there; otherwise search the pages and the stylesheet for its `selector`, then its `snippet`; an `occurrences` above 1 usually means one shared cause. A snippet the detector computed appears nowhere in the source: `line-height 1.24x (need >=1.3)` is line-height divided by font-size. With no selector, check every text rule (and every element that inherits a line-height under a larger font-size) whose line-height is under the threshold or within about 0.2 of it, above all where the font-size is a `clamp()` or `calc()` value, which the static scan can misjudge; raise their line-height.
 5. Keep the direction. Every promise in the contract (THESIS, OWN-WORLD, STORY, FIRST VIEWPORT) still holds after your change. Resolve low contrast by adjusting the direction's own token, not by retreating to gray on white; resolve a cramped phone layout inside the direction's composition, not by swapping in a stock layout. When your packet says to work within DESIGN.md, its tokens are fixed: use a different existing token instead, and when none works, change nothing and say so under `not changed`, naming the token and its value.
 6. Content stays true: no invented proof, and marked placeholders stay marked. Content is visible at load: entrance motion starts from the already-visible final state or is removed (`directions.md`, the comp).
 7. Resolve findings by changing the design, never by silencing the detector: no `impeccable-disable` markers and no edits to `.impeccable/` configuration.
@@ -182,5 +182,5 @@ changed:
 not changed:
 - <id>: <why> (or "none")
 check: <per page: pass | fail (<n>) | error>
-opened: <every screenshot path you opened>
+opened: <every screenshot path you opened, absolute, comma-separated>
 ```

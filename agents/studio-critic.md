@@ -22,7 +22,7 @@ Return exactly this, and nothing else:
 ```
 assignment: design critique | audit
 round: <n, or "redesign">
-opened: <every PNG path you opened>
+opened: <every PNG path you opened, absolute, comma-separated>
 score: <total>/<applicable max> (<band>)
 previous:
 - <id>: resolved | partial | unresolved: <what the screenshot shows>

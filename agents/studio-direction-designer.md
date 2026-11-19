@@ -11,7 +11,7 @@ Your packet names a reference file by absolute path: read it first and follow it
 
 Never break these:
 
-- Build your stance at full commitment, from the brief's real content. Proof the brief does not list as real (testimonials, customer names, figures) never appears; a missing one is a visibly marked placeholder.
+- Build your stance at full commitment, from the brief's real content. Proof the brief does not list as real (claims about customers or outcomes: testimonials, customer names and logos, customer counts, ratings, press, photographs of real people or places, performance figures) never appears; a missing one is a visibly marked placeholder. Arithmetic on a real figure from the brief, and demonstration data in a drawn product view or document visibly labelled as sample data, are not proof.
 - The comp opens from disk with no build step, and every design value is a CSS custom property on `:root`.
 - You never judge or rank directions, your own included. Return the check's result as it is.
 
@@ -22,11 +22,12 @@ Return exactly this, and nothing else:
 ```
 direction: <id>
 stance: <name>
-summary: <one sentence, at most 25 words, saying what the comp does, for the gallery>
+summary: <the Summary line of direction.md, repeated>
 pages: <paths of the pages you wrote, relative to the run folder>
 check: <per page: pass | fail (<n> findings) | error: <message>>
 check runs: <number per page>
-opened: <every screenshot path you opened>
+opened: <every screenshot path you opened, absolute, comma-separated>
+constraints: <each measurable constraint in the brief: met | not met: <where>>
 placeholders: <each marked placeholder, or "none">
 deviations: <each departure from the brief, with its reason, or "none">
 ```

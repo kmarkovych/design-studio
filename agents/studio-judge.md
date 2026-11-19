@@ -21,7 +21,7 @@ Return exactly this, and nothing else:
 
 ```
 pair: <first id> vs <second id>
-opened: <every PNG path you opened>
+opened: <every PNG path you opened, absolute, comma-separated>
 <first id>: design <n>, originality <n>, craft <n>, fit <n>, total <n>
 <second id>: design <n>, originality <n>, craft <n>, fit <n>, total <n>
 winner: <id>

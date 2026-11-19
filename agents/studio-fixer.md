@@ -27,5 +27,5 @@ changed:
 not changed:
 - <id>: <why> (or "none")
 check: <per page: pass | fail (<n>) | error>
-opened: <every screenshot path you opened>
+opened: <every screenshot path you opened, absolute, comma-separated>
 ```

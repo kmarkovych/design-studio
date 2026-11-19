@@ -1,12 +1,15 @@
 // node check.mjs <page.html> [--json]
 // Scripted pass/fail test of one rendered comp page. Exit 0 pass, 2 primary findings, 1 operational failure.
-import { existsSync, mkdirSync, writeFileSync, statSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, statSync, rmSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import { findImpeccable, runImpeccable, isMain } from './lib.mjs';
+import { slicePng } from './png.mjs';
 
 const DESKTOP = '1440x900';
 const PHONE = '390x844';
+const SLICE_HEIGHTS = { [DESKTOP]: 1400, [PHONE]: 1600 };
+const SLICE_OVERLAP = 100;
 const SHOT_TIMEOUT_MS = 90000;
 const DETECT_TIMEOUT_MS = 90000;
 
@@ -25,6 +28,25 @@ function takeShots(impeccable, page, dir, errors) {
     const missing = expected.filter((p) => !existsSync(p));
     if (missing.length) errors.push(`screenshot step reported success but did not write: ${missing.join(', ')}`);
     paths.push(...expected.filter((p) => existsSync(p)));
+  }
+  return paths;
+}
+
+// Cuts each whole-page capture into readable numbered slices; returns the slice paths, desktop first.
+function sliceShots(dir, errors) {
+  const paths = [];
+  for (const view of [DESKTOP, PHONE]) {
+    const full = join(dir, `${view}-full.png`);
+    if (!existsSync(full)) continue;
+    try {
+      slicePng(readFileSync(full), SLICE_HEIGHTS[view], SLICE_OVERLAP).forEach((png, i) => {
+        const file = join(dir, `${view}-full-${i + 1}.png`);
+        writeFileSync(file, png);
+        paths.push(file);
+      });
+    } catch (e) {
+      errors.push(`could not slice ${full}: ${e.message}`);
+    }
   }
   return paths;
 }
@@ -63,20 +85,29 @@ const isFinding = (f) => f !== null && typeof f === 'object' && typeof f.antipat
 const isAdvisory = (f) => f.advisory === true || f.severity === 'advisory';
 const isPrimary = (f) => !isAdvisory(f);
 
+// Rendered scans name the page as a file:// URL; record every file as a path.
+const toPath = (file) => (typeof file !== 'string' ? null : file.startsWith('file://') ? fileURLToPath(file) : file);
+
+// Entries are merged by rule, snippet and selector; occurrences = most times one scan reported the same rule and snippet.
 function mergeFindings(runs) {
   const byKey = new Map();
   for (const { label, findings } of runs) {
+    const counts = new Map();
+    const countKey = (f) => JSON.stringify([f.antipattern, f.snippet]);
+    for (const f of findings) counts.set(countKey(f), (counts.get(countKey(f)) ?? 0) + 1);
     for (const f of findings) {
       const key = JSON.stringify([f.antipattern, f.snippet, f.selector ?? null]);
+      const occurrences = counts.get(countKey(f));
       const existing = byKey.get(key);
       if (existing) {
-        existing.scans.push(label);
+        if (!existing.scans.includes(label)) existing.scans.push(label);
+        existing.occurrences = Math.max(existing.occurrences, occurrences);
         continue;
       }
       byKey.set(key, {
         rule: f.antipattern, name: f.name, severity: f.severity, description: f.description,
-        snippet: f.snippet, selector: f.selector ?? null, line: f.line ?? 0, scans: [label],
-        advisory: isAdvisory(f),
+        snippet: f.snippet, selector: f.selector ?? null, file: toPath(f.file),
+        line: f.line ?? 0, occurrences, scans: [label], advisory: isAdvisory(f),
       });
     }
   }
@@ -95,11 +126,14 @@ export function runCheck(pageArg, { cwd = process.cwd(), env = process.env } = {
   const errors = [];
   const impeccable = findImpeccable({ cwd, env });
   let screenshots = [];
+  let slices = [];
   const runs = [];
   if (!impeccable) {
     errors.push('impeccable skill not found; install it with "npx impeccable install"');
   } else {
-    screenshots = takeShots(impeccable, page, join(dir, 'shots', name), errors);
+    const shotDir = join(dir, 'shots', name);
+    screenshots = takeShots(impeccable, page, shotDir, errors);
+    slices = sliceShots(shotDir, errors);
     const url = pathToFileURL(page).href;
     const plan = [['static', page, null], [`rendered-${DESKTOP}`, url, DESKTOP], [`rendered-${PHONE}`, url, PHONE]];
     for (const [label, target, viewport] of plan) {
@@ -111,7 +145,7 @@ export function runCheck(pageArg, { cwd = process.cwd(), env = process.env } = {
   const strip = ({ advisory, ...rest }) => rest;
   const findings = merged.filter((f) => !f.advisory).map(strip);
   const out = {
-    page, pass: findings.length === 0 && errors.length === 0, screenshots, findings,
+    page, pass: findings.length === 0 && errors.length === 0, screenshots, slices, findings,
     advisories: merged.filter((f) => f.advisory).map(strip), errors,
     impeccableVersion: impeccable?.version ?? null, checkedAt: new Date().toISOString(),
   };
@@ -124,7 +158,7 @@ function formatHuman(out) {
   const lines = [`${out.pass ? 'PASS' : 'FAIL'} ${out.page}`,
     `${out.findings.length} primary finding(s), ${out.advisories.length} advisory, ${out.errors.length} error(s)`];
   for (const f of out.findings) {
-    lines.push(`  [${f.severity}] ${f.rule}${f.selector ? ` ${f.selector}` : ''}: ${f.snippet} (${f.scans.join(', ')})`);
+    lines.push(`  [${f.severity}] ${f.rule}${f.selector ? ` ${f.selector}` : ''}: ${f.snippet}${f.file ? ` at ${f.file}${f.line ? `:${f.line}` : ''}` : ''}${f.occurrences > 1 ? ` x${f.occurrences}` : ''} (${f.scans.join(', ')})`);
   }
   for (const e of out.errors) lines.push(`  error: ${e}`);
   return lines.join('\n');

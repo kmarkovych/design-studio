@@ -21,7 +21,7 @@ Before the first round, find out yourself:
 - what the product is, from the README, docs, package or config files, routes, and the copy already in the project;
 - which screens exist, and for a redesign, the page in question as a file path or a URL;
 - the brand assets on hand: name, logo files, licensed fonts, images, with paths;
-- the proof on hand: testimonials, customer names, figures, case studies, press, with paths, and whether each is approved for use;
+- the proof on hand: testimonials, customer names and logos, ratings, performance figures, case studies, press, with paths, and whether each is approved for use;
 - the stack, if there is a codebase;
 - design tokens or stylesheets already in use;
 - `.impeccable/config.json`, and earlier runs in `<root>/design/runs/`.
@@ -101,7 +101,7 @@ Each run has its own brief, for the screens at hand. Settle these, in dependency
 2. **Other screens.** Built only for the direction the user picks at Gate 2. Recommend only the screens needed to show the system working; each one is another page for the direction designer and for every refinement round.
 3. **Purpose and primary action** (depends on 1). Who arrives, what they came for, and the one action the page exists for, in its working form (a search form, a booking slot, a plan picker), not a link that points to it elsewhere.
 4. **Mode** (depends on 1 and 3). Impeccable's mode for this surface: Persuade (the visitor decides and acts), Operate (completes a piece of work in the product), Read (understands something) or Experience (is inside the work itself). Choose from the surface, not the product: a tool's pricing page is Persuade.
-5. **Content** (depends on 1). Where the real copy comes from: the existing page, a document (path), text the user pastes, or copy the studio drafts from PRODUCT.md facts and marks as draft. Then the proof: which testimonials, customer names, figures and logos are real and approved. Everything else is absent and is never invented.
+5. **Content** (depends on 1). Where the real copy comes from: the existing page, a document (path), text the user pastes, or copy the studio drafts from PRODUCT.md facts and marks as draft. Then the proof, meaning claims about customers or outcomes (testimonials, customer names and logos, customer counts, ratings, press, photographs of real people or places, performance figures): which items are real and approved. Everything else is absent and is never invented.
 6. **Constraints.** Technical (no JavaScript, fonts that must be used or avoided, locales, right-to-left), accessibility beyond PRODUCT.md, and for a redesign what must survive.
 7. **References.** Sites or screens the user likes and dislikes, and what exactly about each. Taste lives here.
 8. **Success** (depends on 3). What a successful result does for its visitor, and what will make the user pick a direction at Gate 2.
@@ -182,7 +182,7 @@ Primary action: <the action in its working form>.
 ## Content
 Copy source: <path, pasted text below, existing page, or "drafted by the studio from PRODUCT.md, marked as draft">
 Proof that is real: <item, path> (or "none")
-Absent, never to be invented: <testimonials, customer names, figures, logos ...>
+Absent, never to be invented: <testimonials, customer names, logos, customer counts, ratings, press, photographs, performance figures ...>
 
 ## Constraints
 - <constraint>
@@ -229,6 +229,8 @@ A stance is a point of view, not a look: it says what the page believes, what le
    - Each traces to something the user said.
    - None could describe a competitor's page unchanged; if a stance names only the category's usual arrangement, replace it.
    - Each serves the primary action; a stance that hides it fails the brief.
+   - What a stance gives up is nothing the brief's Success section requires; a stance that gives that up fails the brief.
+   - What a stance leads with can be built from real content the brief has. If it needs a person, a quote or an image the brief marks absent, replace the stance, or ask for that content at Gate 1.
 5. **Name them** with one to three words from the product's own world: an object, a place, a practice ("Day sheet", "Waiting room", "Chart notes"). Never an adjective or a mood ("Clean", "Bold", "Modern"); each name starts with a different word.
 
 ## Gate 1
